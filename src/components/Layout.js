@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useReducer } from "react";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+
 import Navigation from "./Navigation";
 import MovieCard from "./MovieCard";
+import MovieDetail from "./MovieDetail";
 import SearchBar from "./SearchBar";
 
 const MOVIE_API_URL = "https://www.omdbapi.com/?s=man&apikey=4a3b711b";
@@ -8,16 +11,30 @@ const MOVIE_API_URL = "https://www.omdbapi.com/?s=man&apikey=4a3b711b";
 const initialState = {
 	loading: true,
 	movies: [],
+	movie: null,
 	errorMessage: null,
 };
 
 const reducer = (state, action) => {
 	switch (action.type) {
+		case "SEARCH_MOVIE_REQUEST":
+			return {
+				...state,
+				loading: true,
+				errorMessage: null,
+			};
 		case "SEARCH_MOVIES_REQUEST":
 			return {
 				...state,
 				loading: true,
 				errorMessage: null,
+			};
+		case "SEARCH_MOVIE_SUCCESS":
+			return {
+				...state,
+				loading: false,
+				errorMessage: null,
+				movie: action.payload,
 			};
 		case "SEARCH_MOVIES_SUCCESS":
 			return {
@@ -54,7 +71,28 @@ const AppLayout = (props) => {
 				} else {
 					dispatch({
 						type: "SEARCH_MOVIES_FAILURE",
-						error: jsonResponse.error,
+						error: jsonResponse.Error,
+					});
+				}
+			});
+	};
+
+	const searchById = (searchParameter) => {
+		dispatch({
+			type: "SEARCH_MOVIE_REQUEST",
+		});
+		fetch(`https://www.omdbapi.com/?i=${searchParameter}&apikey=4a3b711b`)
+			.then((response) => response.json())
+			.then((jsonResponse) => {
+				if (jsonResponse.Response === "True") {
+					dispatch({
+						type: "SEARCH_MOVIE_SUCCESS",
+						payload: jsonResponse.Search,
+					});
+				} else {
+					dispatch({
+						type: "SEARCH_MOVIES_FAILURE",
+						error: jsonResponse.Error,
 					});
 				}
 			});
@@ -74,21 +112,30 @@ const AppLayout = (props) => {
 	const { movies, loading, errorMessage } = state;
 
 	return (
-		<div className="min-h-screen bg-gray-200 p-2">
-			<Navigation />
-			<SearchBar search={search} loading={loading} />
-			<div className="grid grid-cols-4 gap-3 p-2 justify-items-center">
-				{loading && !errorMessage ? (
-					<p>Loading....</p>
-				) : errorMessage ? (
-					<div>{errorMessage}</div>
-				) : (
-					movies.map((movie, index) => {
-						return <MovieCard key={index} movie={movie} />;
-					})
-				)}
+		<BrowserRouter>
+			<div className="min-h-screen bg-gray-200 p-2">
+				<Navigation />
+				<SearchBar search={search} loading={loading} />
+				<div className="grid grid-cols-6 gap-3 p-2 justify-items-center">
+					<Switch>
+						<Route path="/" exact>
+							{loading && !errorMessage ? (
+								<p>Loading....</p>
+							) : errorMessage ? (
+								<div>{errorMessage}</div>
+							) : (
+								movies.map((movie, index) => {
+									return <MovieCard key={index} movie={movie} />;
+								})
+							)}
+						</Route>
+						<Route path="/movie/:imdbID">
+							<MovieDetail searchById={searchById} />;
+						</Route>
+					</Switch>
+				</div>
 			</div>
-		</div>
+		</BrowserRouter>
 	);
 };
 

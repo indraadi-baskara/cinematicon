@@ -1,10 +1,15 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const MovieCard = ({ movie }) => {
 	return (
 		<div className="wrapper max-w-xs bg-white rounded-b-md shadow-lg overflow-hidden">
 			<div>
-				<img src={movie.Poster} alt={movie.Title} />
+				<img
+					className="w-64 h-64 object-cover"
+					src={movie.Poster}
+					alt={movie.Title}
+				/>
 			</div>
 			<div className="p-3 space-y-3">
 				<h3 className="text-gray-700 font-semibold text-md">{movie.Title}</h3>
@@ -53,7 +58,10 @@ const MovieCard = ({ movie }) => {
 					</span>
 				</p> */}
 			</div>
-			<button className="bg-teal-600 w-full flex justify-center py-2 text-white font-semibold transition duration-300 hover:bg-teal-500">
+			<Link
+				to={`/movie/${movie.imdbID}`}
+				className="bg-teal-600 w-full flex justify-center py-2 text-white font-semibold transition duration-300 hover:bg-teal-500"
+			>
 				<svg
 					fill="currentColor"
 					viewBox="0 0 20 20"
@@ -67,7 +75,7 @@ const MovieCard = ({ movie }) => {
 					<path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"></path>
 				</svg>
 				reservation
-			</button>
+			</Link>
 		</div>
 	);
 };

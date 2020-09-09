@@ -9,7 +9,7 @@ const SearchBar = (props) => {
 	};
 
 	return (
-		<div className="m-4">
+		<div className="m-2">
 			<input
 				disabled={props.loading}
 				value={searchParameter}
