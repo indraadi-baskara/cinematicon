@@ -23,6 +23,11 @@ const reducer = (state, action) => {
 				loading: true,
 				errorMessage: null,
 			};
+		case "RESET_MOVIE":
+			return {
+				...state,
+				movie: null,
+			};
 		case "SEARCH_MOVIES_REQUEST":
 			return {
 				...state,
@@ -55,6 +60,7 @@ const reducer = (state, action) => {
 
 const AppLayout = (props) => {
 	const [state, dispatch] = useReducer(reducer, initialState);
+	const { movies, movie, loading, errorMessage } = state;
 
 	const search = (searchParameter) => {
 		dispatch({
@@ -81,14 +87,18 @@ const AppLayout = (props) => {
 		dispatch({
 			type: "SEARCH_MOVIE_REQUEST",
 		});
+		dispatch({
+			type: "RESET_MOVIE",
+		});
 		fetch(`https://www.omdbapi.com/?i=${searchParameter}&apikey=4a3b711b`)
 			.then((response) => response.json())
 			.then((jsonResponse) => {
 				if (jsonResponse.Response === "True") {
 					dispatch({
 						type: "SEARCH_MOVIE_SUCCESS",
-						payload: jsonResponse.Search,
+						payload: jsonResponse,
 					});
+					console.log(movie);
 				} else {
 					dispatch({
 						type: "SEARCH_MOVIES_FAILURE",
@@ -109,28 +119,29 @@ const AppLayout = (props) => {
 			});
 	}, []);
 
-	const { movies, loading, errorMessage } = state;
-
 	return (
 		<BrowserRouter>
-			<div className="min-h-screen bg-gray-200 p-2">
+			<div className="min-h-screen bg-gray-200">
 				<Navigation />
-				<SearchBar search={search} loading={loading} />
-				<div className="grid grid-cols-6 gap-3 p-2 justify-items-center">
+				<div className="">
 					<Switch>
 						<Route path="/" exact>
+							<SearchBar search={search} loading={loading} />
+
 							{loading && !errorMessage ? (
 								<p>Loading....</p>
 							) : errorMessage ? (
 								<div>{errorMessage}</div>
 							) : (
-								movies.map((movie, index) => {
-									return <MovieCard key={index} movie={movie} />;
-								})
+								<div className="grid grid-cols-6 gap-3 p-2 justify-items-center">
+									{movies.map((movie, index) => {
+										return <MovieCard key={index} movie={movie} />;
+									})}
+								</div>
 							)}
 						</Route>
 						<Route path="/movie/:imdbID">
-							<MovieDetail searchById={searchById} />;
+							<MovieDetail />
 						</Route>
 					</Switch>
 				</div>
